@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Navbar from './components/Navbar'
 
 function Test() {
   const [backendStatus, setBackendStatus] = useState('checking...')
@@ -11,23 +12,12 @@ function Test() {
 
   const checkBackendConnection = async () => {
     try {
-      // Get backend URL from environment variable
       const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
       setBackendUrl(baseUrl)
-
-      // Test basic backend connectivity
-      const response = await fetch(`${baseUrl}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
+      const response = await fetch(`${baseUrl}`)
       if (response.ok) {
         const data = await response.json()
         setBackendStatus(`✅ Connected - ${data.message || 'OK'}`)
-        
-        // Now test database connectivity
         await checkDatabaseConnection(baseUrl)
       } else {
         setBackendStatus(`❌ Failed - ${response.status} ${response.statusText}`)
@@ -41,13 +31,7 @@ function Test() {
 
   const checkDatabaseConnection = async (baseUrl) => {
     try {
-      const response = await fetch(`${baseUrl}/test`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
+      const response = await fetch(`${baseUrl}/test`)
       if (response.ok) {
         const dbData = await response.json()
         setDatabaseStatus(dbData)
@@ -60,30 +44,22 @@ function Test() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-8">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-          Backend & Database Test
-        </h1>
-
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">Backend URL:</h3>
-            <p className="text-sm text-gray-600 break-all bg-gray-100 p-2 rounded">
-              {backendUrl || 'Detecting...'}
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-black dark:to-neutral-900">
+      <Navbar />
+      <div className="container mx-auto px-6 pt-24 pb-16">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Backend & Database Test</h1>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="rounded-xl border bg-white/80 dark:bg-white/[0.04] p-6">
+            <h3 className="text-lg font-semibold mb-2">Backend URL</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 break-all">{backendUrl || 'Detecting...'}</p>
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold mb-2">Backend Status</h3>
+              <p className="text-sm font-mono bg-gray-100 dark:bg-white/[0.06] p-2 rounded">{backendStatus}</p>
+            </div>
           </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">Backend Status:</h3>
-            <p className="text-sm font-mono bg-gray-100 p-2 rounded">
-              {backendStatus}
-            </p>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">Database Status:</h3>
-            <div className="text-sm bg-gray-100 p-3 rounded">
+          <div className="rounded-xl border bg-white/80 dark:bg-white/[0.04] p-6">
+            <h3 className="text-lg font-semibold mb-2">Database Status</h3>
+            <div className="text-sm bg-gray-100 dark:bg-white/[0.06] p-3 rounded">
               {databaseStatus ? (
                 databaseStatus.error ? (
                   <p className="text-red-600 font-mono">{databaseStatus.error}</p>
@@ -104,20 +80,6 @@ function Test() {
               )}
             </div>
           </div>
-
-          <button
-            onClick={checkBackendConnection}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded transition-colors"
-          >
-            Test Again
-          </button>
-
-          <a
-            href="/"
-            className="block w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded text-center transition-colors"
-          >
-            Back to Home
-          </a>
         </div>
       </div>
     </div>
